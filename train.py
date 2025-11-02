@@ -108,12 +108,13 @@ def valid(args, model, writer, test_loader, global_step):
         batch = tuple(t.to(args.device) for t in batch)
         x, y = batch
         with torch.no_grad():
-            logits = model(x)[0]
+            with autocast(enabled=args.fp16):
+                logits = model(x)[0]
 
-            eval_loss = loss_fct(logits, y)
-            eval_losses.update(eval_loss.item())
+                eval_loss = loss_fct(logits, y)
+                eval_losses.update(eval_loss.item())
 
-            preds = torch.argmax(logits, dim=-1)
+                preds = torch.argmax(logits, dim=-1)
 
         if len(all_preds) == 0:
             all_preds.append(preds.detach().cpu().numpy())
