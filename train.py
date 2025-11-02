@@ -336,6 +336,16 @@ def main():
                              "Positive power of 2: static loss scaling value.\n")
     args = parser.parse_args()
 
+    # 1) 兼容 torchrun：自动从环境变量读取 local_rank
+    if args.local_rank == -1 and "LOCAL_RANK" in os.environ:
+        args.local_rank = int(os.environ["LOCAL_RANK"])
+
+    # 可选：打印一下，便于排障
+    print("CUDA_VISIBLE_DEVICES =", os.environ.get("CUDA_VISIBLE_DEVICES"))
+    print("WORLD_SIZE =", os.environ.get("WORLD_SIZE"),
+          "RANK =", os.environ.get("RANK"),
+          "LOCAL_RANK =", os.environ.get("LOCAL_RANK"))
+
     # Setup CUDA, GPU & distributed training
     if args.local_rank == -1:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
